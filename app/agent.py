@@ -5,6 +5,7 @@ import google.auth
 import google.auth.transport.requests
 from google.adk.agents import Agent
 from google.adk.tools.mcp_tool import MCPToolset, StreamableHTTPConnectionParams
+from google.adk.tools import AgentTool
 
 # Load environment variables
 dotenv.load_dotenv()
@@ -141,5 +142,5 @@ root_agent = Agent(
     - Monitoring: Use monitoring_agent for questions about metrics and alerts.
     - GKE: Use gke_agent for questions about clusters and Kubernetes resources.
     """,
-    tools=[logging_agent, monitoring_agent, gke_agent]
+    tools=[AgentTool(logging_agent), AgentTool(monitoring_agent), AgentTool(gke_agent)]
 )

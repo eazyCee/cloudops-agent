@@ -34,8 +34,27 @@ except Exception as e:
     db_password = os.getenv("DB_PASSWORD")
     db_ip = os.getenv("DB_IP")
 
-# Constructing URL assuming PostgreSQL. Adjust if it's MySQL.
-db_url = f"postgresql+asyncpg://{db_user}:{db_password}@{db_ip}/esbpoc"
+# Get project ID programmatically
+try:
+    _, project_id = google.auth.default()
+except Exception:
+    project_id = os.getenv("GOOGLE_CLOUD_PROJECT")
+
+connection_name = os.getenv("INSTANCE_CONNECTION_NAME")
+socket_path = os.getenv("INSTANCE_UNIX_SOCKET")
+
+if socket_path:
+    db_url = f"postgresql+asyncpg://{db_user}:{db_password}@/esbpoc?host={socket_path}"
+elif connection_name:
+    db_url = f"postgresql+asyncpg://{db_user}:{db_password}@/esbpoc?host=/cloudsql/{connection_name}"
+elif project_id:
+    # Fallback to constructing connection name using programmatic project ID
+    connection_name = f"{project_id}:us-central1:testing"
+    db_url = f"postgresql+asyncpg://{db_user}:{db_password}@/esbpoc?host=/cloudsql/{connection_name}"
+else:
+    print("Warning: Neither INSTANCE_UNIX_SOCKET, INSTANCE_CONNECTION_NAME, nor project_id found. Falling back to DB_IP.")
+    db_url = f"postgresql+asyncpg://{db_user}:{db_password}@{db_ip}/esbpoc"
+
 
 session_service = DatabaseSessionService(db_url=db_url)
 runner = Runner(agent=root_agent, app_name="cloudops-agent", session_service=session_service)

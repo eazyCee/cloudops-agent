@@ -1,4 +1,5 @@
 import os
+import uvicorn
 from app.agent import root_agent
 from google.adk.runners import Runner
 from google.adk.sessions import DatabaseSessionService
@@ -79,5 +80,8 @@ async def handle_query(request: QueryRequest):
                     response_text = "[Empty response]"
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error running query: {e}")
-        
     return {"response": response_text, "is_new_session": is_new}
+
+if __name__ == "__main__":
+    port = int(os.getenv("PORT", 8080))
+    uvicorn.run(app, host="0.0.0.0", port=port)

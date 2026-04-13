@@ -2,3 +2,6 @@ google-adk
 mcp
 python-dotenv
 google-cloud-secret-manager
+fastapi
+uvicorn
+

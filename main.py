@@ -5,8 +5,6 @@ from google.adk.sessions import DatabaseSessionService
 from google.genai import types
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
-from google.cloud import secretmanager
-import google.auth
 
 app = FastAPI()
 

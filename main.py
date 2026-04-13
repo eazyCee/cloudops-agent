@@ -1,5 +1,7 @@
 import os
 import uvicorn
+from google.cloud import secretmanager
+import google.auth
 from app.agent import root_agent
 from google.adk.runners import Runner
 from google.adk.sessions import DatabaseSessionService

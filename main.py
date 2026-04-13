@@ -5,6 +5,8 @@ from google.adk.sessions import DatabaseSessionService
 from google.genai import types
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
+from google.cloud import secretmanager
+import google.auth
 
 app = FastAPI()
 
@@ -13,9 +15,24 @@ class QueryRequest(BaseModel):
     session_id: str
     query: str
 
-db_user = os.getenv("DB_USER")
-db_password = os.getenv("DB_PASSWORD")
-db_ip = os.getenv("DB_IP")
+def get_secret(secret_id: str) -> str:
+    client = secretmanager.SecretManagerServiceClient()
+    credentials, project_id = google.auth.default()
+    name = f"projects/{project_id}/secrets/{secret_id}/versions/latest"
+    response = client.access_secret_version(request={"name": name})
+    return response.payload.data.decode("UTF-8")
+
+try:
+    db_user = get_secret("DB_USER")
+    db_password = get_secret("DB_PASSWORD")
+    db_ip = get_secret("DB_IP")
+except Exception as e:
+    print(f"Failed to fetch secrets from Secret Manager: {e}")
+    print("Falling back to environment variables.")
+    db_user = os.getenv("DB_USER")
+    db_password = os.getenv("DB_PASSWORD")
+    db_ip = os.getenv("DB_IP")
+
 # Constructing URL assuming PostgreSQL. Adjust if it's MySQL.
 db_url = f"postgresql+asyncpg://{db_user}:{db_password}@{db_ip}/postgres"
 

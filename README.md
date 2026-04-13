@@ -30,6 +30,24 @@ A multi-agent system using the Agent Development Kit (ADK) and Model Context Pro
    ```
    The `.env` file already has `GOOGLE_GENAI_USE_VERTEXAI=True` and `GOOGLE_CLOUD_LOCATION=global` set.
 
+### Secret Manager Setup
+
+To use Google Cloud Secret Manager for database credentials, create the following secrets:
+
+```bash
+# Create secrets
+gcloud secrets create DB_USER --replication-policy="automatic"
+gcloud secrets create DB_PASSWORD --replication-policy="automatic"
+gcloud secrets create DB_IP --replication-policy="automatic"
+
+# Add versions with data
+echo -n "your-db-user" | gcloud secrets versions add DB_USER --data-file=-
+echo -n "your-db-password" | gcloud secrets versions add DB_PASSWORD --data-file=-
+echo -n "your-db-ip" | gcloud secrets versions add DB_IP --data-file=-
+```
+
+Ensure the service account running the application has the `Secret Manager Secret Accessor` role.
+
 ## Testing Locally
 
 You can run the agent in different modes using `main.py`:

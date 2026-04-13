@@ -9,7 +9,7 @@ from google.adk.tools import AgentTool
 
 # Load environment variables
 dotenv.load_dotenv()
-PROJECT_ID=""
+project_id=""
 def get_gcp_oauth_token():
     """Retrieves a GCP OAuth token."""
     credentials, project_id = google.auth.default(
@@ -142,7 +142,7 @@ root_agent = Agent(
     - Monitoring: Use monitoring_agent for questions about metrics and alerts.
     - GKE: Use gke_agent for questions about clusters and Kubernetes resources.
 
-    By default, you will fetch data from the project {project_id}
+    By default, you will fetch data from the project {project_id} unless asked otherwise by the user.
     """,
     tools=[AgentTool(logging_agent), AgentTool(monitoring_agent), AgentTool(gke_agent)]
 )

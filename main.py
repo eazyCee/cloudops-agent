@@ -35,7 +35,7 @@ except Exception as e:
     db_ip = os.getenv("DB_IP")
 
 # Constructing URL assuming PostgreSQL. Adjust if it's MySQL.
-db_url = f"postgresql+asyncpg://{db_user}:{db_password}@{db_ip}/postgres"
+db_url = f"postgresql+asyncpg://{db_user}:{db_password}@{db_ip}/esbpoc"
 
 session_service = DatabaseSessionService(db_url=db_url)
 runner = Runner(agent=root_agent, app_name="cloudops-agent", session_service=session_service)

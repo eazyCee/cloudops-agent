@@ -1,16 +1,57 @@
-import asyncio
 import os
-import sys
 from app.agent import root_agent
 from google.adk.runners import Runner
-from google.adk.sessions import InMemorySessionService
+from google.adk.sessions import DatabaseSessionService
 from google.genai import types
+from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel
 
-async def run_query(runner, user_id, session_id, query):
+app = FastAPI()
+
+class QueryRequest(BaseModel):
+    user_id: str
+    session_id: str
+    query: str
+
+db_user = os.getenv("DB_USER")
+db_password = os.getenv("DB_PASSWORD")
+db_ip = os.getenv("DB_IP")
+# Constructing URL assuming PostgreSQL. Adjust if it's MySQL.
+db_url = f"postgresql+asyncpg://{db_user}:{db_password}@{db_ip}/postgres"
+
+session_service = DatabaseSessionService(db_url=db_url)
+runner = Runner(agent=root_agent, app_name="cloudops-agent", session_service=session_service)
+
+@app.post("/query")
+async def handle_query(request: QueryRequest):
+    user_id = request.user_id
+    session_id = request.session_id
+    query = request.query
+    
+    app_name = "cloudops-agent"
+    
+    is_new = False
     try:
-        # Construct the message as types.Content
-        new_message = types.Content(role="user", parts=[types.Part.from_text(text=query)])
-        
+        # Try to get session to check if it exists
+        session = await session_service.get_session(app_name=app_name, user_id=user_id, session_id=session_id)
+        if not session:
+            is_new = True
+            await session_service.create_session(app_name=app_name, user_id=user_id, session_id=session_id)
+    except Exception as e:
+        print(f"Session check failed or session not found: {e}")
+        # Fallback: assume it doesn't exist and try to create it
+        is_new = True
+        try:
+            await session_service.create_session(app_name=app_name, user_id=user_id, session_id=session_id)
+        except Exception as create_error:
+            print(f"Failed to create session: {create_error}")
+            pass
+
+    # Construct the message as types.Content
+    new_message = types.Content(role="user", parts=[types.Part.from_text(text=query)])
+    
+    response_text = ""
+    try:
         async for event in runner.run_async(
             user_id=user_id,
             session_id=session_id,
@@ -18,51 +59,10 @@ async def run_query(runner, user_id, session_id, query):
         ):
             if event.is_final_response():
                 if event.content and event.content.parts:
-                    print(f"Response: {event.content.parts[0].text}")
+                    response_text = event.content.parts[0].text
                 else:
-                    print("Response: [Empty response]")
+                    response_text = "[Empty response]"
     except Exception as e:
-        print(f"Error running query: {e}")
-
-async def main():
-    session_service = InMemorySessionService()
-    app_name = "cloudops-agent"
-    user_id = "default_user"
-    session_id = "default_session"
-    
-    # Create session
-    await session_service.create_session(app_name=app_name, user_id=user_id, session_id=session_id)
-    
-    runner = Runner(agent=root_agent, app_name=app_name, session_service=session_service)
-
-    # Check if a query was passed as an argument
-    if len(sys.argv) > 1:
-        query = " ".join(sys.argv[1:])
-        print(f"Running query: {query}")
-        await run_query(runner, user_id, session_id, query)
-        return
-
-    # Fallback to environment variable if available
-    query = os.getenv("QUERY")
-    if query:
-        print(f"Running query from env: {query}")
-        await run_query(runner, user_id, session_id, query)
-        return
-
-    # Otherwise run interactive loop
-    print("Cloud Ops Agent initialized. Type 'exit' to quit.")
-    while True:
-        try:
-            query = input("Query: ")
-            if query.lower() == 'exit':
-                break
-            if not query.strip():
-                continue
-            await run_query(runner, user_id, session_id, query)
-        except EOFError:
-            break
-        except Exception as e:
-            print(f"Error: {e}")
-
-if __name__ == "__main__":
-    asyncio.run(main())
+        raise HTTPException(status_code=500, detail=f"Error running query: {e}")
+        
+    return {"response": response_text, "is_new_session": is_new}

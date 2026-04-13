@@ -9,7 +9,7 @@ from google.adk.tools import AgentTool
 
 # Load environment variables
 dotenv.load_dotenv()
-
+PROJECT_ID=""
 def get_gcp_oauth_token():
     """Retrieves a GCP OAuth token."""
     credentials, project_id = google.auth.default(
@@ -64,7 +64,7 @@ def load_mcp_tools(config_path: str) -> dict:
     return tools
 
 # Path to config file
-config_file = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "mcp_config.json")
+config_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), "mcp_config.json")
 mcp_toolsets = load_mcp_tools(config_file)
 
 # Extract toolsets
@@ -135,12 +135,14 @@ gke_agent = Agent(
 root_agent = Agent(
     name="cloud_ops_orchestrator",
     model="gemini-3.1-pro-preview",
-    instruction="""
+    instruction=f"""
     You are a Cloud Operations orchestrator. You delegate tasks to specialized agents.
     Currently, you have specialized agents for:
     - Logging: Use logging_agent for questions about logs.
     - Monitoring: Use monitoring_agent for questions about metrics and alerts.
     - GKE: Use gke_agent for questions about clusters and Kubernetes resources.
+
+    By default, you will fetch data from the project {project_id}
     """,
     tools=[AgentTool(logging_agent), AgentTool(monitoring_agent), AgentTool(gke_agent)]
 )

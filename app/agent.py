@@ -64,7 +64,7 @@ def load_mcp_tools(config_path: str) -> dict:
     return tools
 
 # Path to config file
-config_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), "mcp_config.json")
+config_file = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "mcp_config.json")
 mcp_toolsets = load_mcp_tools(config_file)
 
 # Extract toolsets

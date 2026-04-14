@@ -50,6 +50,7 @@ def load_mcp_tools(config_path: str) -> dict:
                     connection_params=StreamableHTTPConnectionParams(
                         url=url,
                         headers=headers
+                        sse_read_timeout=600.0
                     )
                 )
                 tools[name] = toolset

@@ -10,14 +10,11 @@ from google.adk.tools import AgentTool
 # Load environment variables
 dotenv.load_dotenv()
 from .tools import logging_toolset, monitoring_toolset, gke_toolset
-env_vars = {
-  "GOOGLE_CLOUD_AGENT_ENGINE_ENABLE_TELEMETRY": "true",
-  "OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT": "true",
-}
+
 # Define Logging Agent
 logging_agent = Agent(
     name="logging_agent",
-    model="gemini-3.0-flash",
+    model="gemini-3-flash-preview",
     instruction=f"""
     You are a focused Logging agent. You help users search and retrieve log entries, list log names, and manage log buckets and views in Google Cloud Logging. 
 
@@ -35,7 +32,7 @@ logging_agent = Agent(
 # Define Monitoring Agent
 monitoring_agent = Agent(
     name="monitoring_agent",
-    model="gemini-3.0-flash",
+    model="gemini-3-flash-preview",
     instruction=f"""
     You are a focused Monitoring agent. You help users list time series data, query metrics, and manage alert policies, alerts, metric descriptors, and dashboards in Google Cloud Monitoring.
     
@@ -56,7 +53,7 @@ monitoring_agent = Agent(
 # Define GKE Agent
 gke_agent = Agent(
     name="gke_agent",
-    model="gemini-3.0-flash",
+    model="gemini-3-flash-preview",
     instruction=f"""
     You are a focused GKE agent. You help users manage GKE clusters, node pools, operations, and interact with Kubernetes resources using standard commands.
     
@@ -76,13 +73,14 @@ gke_agent = Agent(
 # Root Agent to orchestrate or expose them
 root_agent = Agent(
     name="cloud_ops_orchestrator",
-    model="gemini-3.0-flash",
+    model="gemini-3-flash-preview",
     instruction=f"""
     You are a Cloud Operations orchestrator. You delegate tasks to specialized agents.
     Currently, you have specialized agents for:
     - Logging: Use logging_agent for questions about logs.
     - Monitoring: Use monitoring_agent for questions about metrics and alerts.
     - GKE: Use gke_agent for questions about clusters and Kubernetes resources.
+
     """,
     tools=[AgentTool(logging_agent), AgentTool(monitoring_agent), AgentTool(gke_agent)]
 )

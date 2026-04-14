@@ -62,7 +62,7 @@ async def handle_query(request: QueryRequest):
         if not session:
             is_new = True
             session = await session_service.create_session(
-                state={}, app_name=app_name, user_id=user_id
+                state={}, app_name=app_name, user_id=user_id, session_id=session_id
             )
     else:
         is_new = True

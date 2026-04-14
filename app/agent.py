@@ -26,7 +26,7 @@ logging_agent = Agent(
     - get_view: Use this as the primary tool to get a specific view on a log bucket. Log views provide fine-grained access control to the logs in your buckets.
     - list_views: Use this as the primary tool to list the log views in a given log bucket. Log views provide fine-grained access control to the logs in your buckets. This is useful for managing who has access to which logs.
     """,
-    tools=[logging_toolset] if logging_toolset else []
+    tools=[logging_toolset]
 )
 
 # Define Monitoring Agent
@@ -47,7 +47,7 @@ monitoring_agent = Agent(
     - list_dashboards: Use this as the primary tool to retrieve a list of existing custom monitoring dashboards in a Google Cloud project. Custom monitoring dashboards let users view and analyze data from different sources in the same context. This is useful for understanding what custom dashboards are currently configured and available in a given project.
     - get_dashboard: Use this as the primary tool to retrieve a single specific custom monitoring dashboard from a Google Cloud project using the resource name of the requested dashboard. Custom monitoring dashboards let users view and analyze data from different sources in the same context. This is often used as a follow on to list_dashboards to get full details on a specific dashboard.
     """,
-    tools=[monitoring_toolset] if monitoring_toolset else []
+    tools=[monitoring_toolset]
 )
 
 # Define GKE Agent
@@ -67,7 +67,7 @@ gke_agent = Agent(
     - list_node_pools: Lists the node pools for a specific GKE cluster.
     - get_node_pool: Gets the details of a specific node pool within a GKE cluster.
     """,
-    tools=[gke_toolset] if gke_toolset else []
+    tools=[gke_toolset]
 )
 
 # Root Agent to orchestrate or expose them

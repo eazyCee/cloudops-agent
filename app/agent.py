@@ -94,7 +94,7 @@ logging_agent = Agent(
 # Define Monitoring Agent
 monitoring_agent = Agent(
     name="monitoring_agent",
-    model="gemini-3.0-flash-preview,
+    model="gemini-3.0-flash-preview",
     instruction=f"""
     You are a focused Monitoring agent. You help users list time series data, query metrics, and manage alert policies, alerts, metric descriptors, and dashboards in Google Cloud Monitoring.
     By default, you will fetch data from the project {project_id} unless asked otherwise by the user.

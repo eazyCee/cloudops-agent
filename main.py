@@ -56,40 +56,38 @@ async def handle_query(request: QueryRequest):
     app_name = "cloudops-agent"
     
     is_new = False
-    try:
-        # Try to get session to check if it exists
+    if session_id:
         session = await session_service.get_session(app_name=app_name, user_id=user_id, session_id=session_id)
         if not session:
             is_new = True
-            await session_service.create_session(app_name=app_name, user_id=user_id, session_id=session_id)
-    except Exception as e:
-        print(f"Session check failed or session not found: {e}")
-        # Fallback: assume it doesn't exist and try to create it
+            session = await session_service.create_session(
+                state={}, app_name=app_name, user_id=user_id
+            )
+    else:
         is_new = True
-        try:
-            await session_service.create_session(app_name=app_name, user_id=user_id, session_id=session_id)
-        except Exception as create_error:
-            print(f"Failed to create session: {create_error}")
-            pass
+        session = await session_service.create_session(
+            state={}, app_name=app_name, user_id=user_id
+        )
 
     # Construct the message as types.Content
     new_message = types.Content(role="user", parts=[types.Part.from_text(text=query)])
     
-    response_text = ""
     try:
-        async for event in runner.run_async(
-            user_id=user_id,
+        events = runner.run(
             session_id=session_id,
+            user_id=user_id,
             new_message=new_message,
-        ):
-            if event.is_final_response():
-                if event.content and event.content.parts:
-                    response_text = event.content.parts[0].text
-                else:
-                    response_text = "[Empty response]"
+        )
+        responses = []
+        for event in events:
+            if event.content and event.content.parts:
+                for part in event.content.parts:
+                    if hasattr(part, 'text') and part.text:
+                        responses.append(part.text)
+        response_text = "\n".join(responses)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error running query: {e}")
-    return {"response": response_text, "is_new_session": is_new}
+    return {"response": response_text, "is_new_session": is_new, "session_id": session.id}
 
 if __name__ == "__main__":
     port = int(os.getenv("PORT", 8080))

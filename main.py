@@ -1,4 +1,5 @@
 import os
+import asyncio
 import uvicorn
 from google.cloud import secretmanager
 import google.auth
@@ -72,14 +73,31 @@ async def handle_query(request: QueryRequest):
     # Construct the message as types.Content
     new_message = types.Content(role="user", parts=[types.Part.from_text(text=query)])
     
+    async def event_worker(q):
+        try:
+            async for event in runner.run_async(
+                user_id=user_id,
+                session_id=session_id,
+                new_message=new_message,
+            ):
+                await q.put(event)
+        except Exception as e:
+            await q.put(e)
+        finally:
+            await q.put(None)
+
+    queue = asyncio.Queue()
+    task = asyncio.create_task(event_worker(queue))
+    
+    responses = []
     try:
-        events = runner.run(
-            session_id=session_id,
-            user_id=user_id,
-            new_message=new_message,
-        )
-        responses = []
-        for event in events:
+        while True:
+            event = await queue.get()
+            if event is None:
+                break
+            if isinstance(event, Exception):
+                raise event
+            
             if event.content and event.content.parts:
                 for part in event.content.parts:
                     if hasattr(part, 'text') and part.text:
@@ -87,6 +105,13 @@ async def handle_query(request: QueryRequest):
         response_text = "\n".join(responses)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error running query: {e}")
+    finally:
+        if not task.done():
+            task.cancel()
+            try:
+                await task
+            except asyncio.CancelledError:
+                pass
     return {"response": response_text, "is_new_session": is_new, "session_id": session.id}
 
 if __name__ == "__main__":

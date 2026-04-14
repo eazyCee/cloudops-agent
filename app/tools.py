@@ -49,7 +49,7 @@ def load_mcp_tools(config_path: str) -> dict:
                 toolset = MCPToolset(
                     connection_params=StreamableHTTPConnectionParams(
                         url=url,
-                        headers=headers
+                        headers=headers,
                         sse_read_timeout=600.0
                     )
                 )

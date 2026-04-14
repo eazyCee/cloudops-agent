@@ -76,10 +76,10 @@ gke_toolset = mcp_toolsets.get("gke")
 # Define Logging Agent
 logging_agent = Agent(
     name="logging_agent",
-    model="gemini-3.1-pro-preview",
-    instruction="""
+    model="gemini-3.0-flash-preview",
+    instruction=f"""
     You are a focused Logging agent. You help users search and retrieve log entries, list log names, and manage log buckets and views in Google Cloud Logging.
-    
+    By default, you will fetch data from the project {project_id} unless asked otherwise by the user.
     Capabilities:
     - list_log_entries: Use this as the primary tool to search and retrieve log entries from Google Cloud Logging. It's essential for debugging application behavior, finding specific error messages, or auditing events. The 'filter' is powerful and can be used to select logs by severity, resource type, text content, and more. IMPORTANT: This tool will only work with a single resource project at a time. Calls with multiple resource projects will fail.
     - list_log_names: Use this as the primary tool to list the log names in a Google Cloud project. This is useful for discovering what logs are available for a project. Only logs which have log entries will be listed.
@@ -94,10 +94,10 @@ logging_agent = Agent(
 # Define Monitoring Agent
 monitoring_agent = Agent(
     name="monitoring_agent",
-    model="gemini-3.1-pro-preview",
-    instruction="""
+    model="gemini-3.0-flash-preview,
+    instruction=f"""
     You are a focused Monitoring agent. You help users list time series data, query metrics, and manage alert policies, alerts, metric descriptors, and dashboards in Google Cloud Monitoring.
-    
+    By default, you will fetch data from the project {project_id} unless asked otherwise by the user.
     Capabilities:
     - list_timeseries: Lists time series data from the Google Cloud Monitoring API
     - query_range: Evaluate a PromQL query in a range of time
@@ -115,10 +115,10 @@ monitoring_agent = Agent(
 # Define GKE Agent
 gke_agent = Agent(
     name="gke_agent",
-    model="gemini-3.1-pro-preview",
-    instruction="""
+    model="gemini-3.0-flash-preview",
+    instruction=f"""
     You are a focused GKE agent. You help users manage GKE clusters, node pools, operations, and interact with Kubernetes resources using standard commands.
-    
+    By default, you will fetch data from the project {project_id} unless asked otherwise by the user.
     Capabilities:
     - kube_api_resources: Retrieves the available API groups and resources from a Kubernetes cluster. This is similar to running kubectl api-resources.
     - kube_get: Gets one or more Kubernetes resources from a cluster. Resources can be filtered by type, name, namespace, and label selectors. Returns the resources in YAML format. This is similar to running kubectl get.
@@ -135,7 +135,7 @@ gke_agent = Agent(
 # Root Agent to orchestrate or expose them
 root_agent = Agent(
     name="cloud_ops_orchestrator",
-    model="gemini-3.1-pro-preview",
+    model="gemini-3.0-flash-preview",
     instruction=f"""
     You are a Cloud Operations orchestrator. You delegate tasks to specialized agents.
     Currently, you have specialized agents for:

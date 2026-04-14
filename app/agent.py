@@ -80,8 +80,6 @@ root_agent = Agent(
     - Logging: Use logging_agent for questions about logs.
     - Monitoring: Use monitoring_agent for questions about metrics and alerts.
     - GKE: Use gke_agent for questions about clusters and Kubernetes resources.
-
-    By default, you will fetch data from the project {project_id} unless asked otherwise by the user.
     """,
     tools=[AgentTool(logging_agent), AgentTool(monitoring_agent), AgentTool(gke_agent)]
 )

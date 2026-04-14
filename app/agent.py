@@ -10,7 +10,10 @@ from google.adk.tools import AgentTool
 # Load environment variables
 dotenv.load_dotenv()
 from .tools import logging_toolset, monitoring_toolset, gke_toolset
-
+env_vars = {
+  "GOOGLE_CLOUD_AGENT_ENGINE_ENABLE_TELEMETRY": "true",
+  "OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT": "true",
+}
 # Define Logging Agent
 logging_agent = Agent(
     name="logging_agent",

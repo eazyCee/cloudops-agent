@@ -17,7 +17,7 @@ env_vars = {
 # Define Logging Agent
 logging_agent = Agent(
     name="logging_agent",
-    model="gemini-3.0-flash-preview",
+    model="gemini-3.0-flash",
     instruction=f"""
     You are a focused Logging agent. You help users search and retrieve log entries, list log names, and manage log buckets and views in Google Cloud Logging. 
 
@@ -35,7 +35,7 @@ logging_agent = Agent(
 # Define Monitoring Agent
 monitoring_agent = Agent(
     name="monitoring_agent",
-    model="gemini-3.0-flash-preview",
+    model="gemini-3.0-flash",
     instruction=f"""
     You are a focused Monitoring agent. You help users list time series data, query metrics, and manage alert policies, alerts, metric descriptors, and dashboards in Google Cloud Monitoring.
     
@@ -56,7 +56,7 @@ monitoring_agent = Agent(
 # Define GKE Agent
 gke_agent = Agent(
     name="gke_agent",
-    model="gemini-3.0-flash-preview",
+    model="gemini-3.0-flash",
     instruction=f"""
     You are a focused GKE agent. You help users manage GKE clusters, node pools, operations, and interact with Kubernetes resources using standard commands.
     
@@ -76,7 +76,7 @@ gke_agent = Agent(
 # Root Agent to orchestrate or expose them
 root_agent = Agent(
     name="cloud_ops_orchestrator",
-    model="gemini-3.0-flash-preview",
+    model="gemini-3.0-flash",
     instruction=f"""
     You are a Cloud Operations orchestrator. You delegate tasks to specialized agents.
     Currently, you have specialized agents for:

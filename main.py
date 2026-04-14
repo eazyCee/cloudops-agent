@@ -1,5 +1,6 @@
 import os
 import asyncio
+import anyio
 import uvicorn
 from google.cloud import secretmanager
 import google.auth
@@ -87,31 +88,27 @@ async def handle_query(request: QueryRequest):
             await q.put(None)
 
     queue = asyncio.Queue()
-    task = asyncio.create_task(event_worker(queue))
-    
     responses = []
+    
     try:
-        while True:
-            event = await queue.get()
-            if event is None:
-                break
-            if isinstance(event, Exception):
-                raise event
+        async with anyio.create_task_group() as tg:
+            tg.start_soon(event_worker, queue)
             
-            if event.content and event.content.parts:
-                for part in event.content.parts:
-                    if hasattr(part, 'text') and part.text:
-                        responses.append(part.text)
+            while True:
+                event = await queue.get()
+                if event is None:
+                    break
+                if isinstance(event, Exception):
+                    raise event
+                
+                if event.content and event.content.parts:
+                    for part in event.content.parts:
+                        if hasattr(part, 'text') and part.text:
+                            responses.append(part.text)
+            
         response_text = "\n".join(responses)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error running query: {e}")
-    finally:
-        if not task.done():
-            task.cancel()
-            try:
-                await task
-            except asyncio.CancelledError:
-                pass
     return {"response": response_text, "is_new_session": is_new, "session_id": session.id}
 
 if __name__ == "__main__":

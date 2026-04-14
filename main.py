@@ -46,13 +46,12 @@ except Exception:
 
 
 session_service = DatabaseSessionService(db_url=db_url)
-runner = Runner(agent=root_agent, app_name="cloudops-agent", session_service=session_service)
-
 @app.post("/query")
 async def handle_query(request: QueryRequest):
     user_id = request.user_id
     session_id = request.session_id
     query = request.query
+    runner = Runner(agent=root_agent, app_name="cloudops-agent", session_service=session_service)
     
     app_name = "cloudops-agent"
     

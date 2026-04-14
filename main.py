@@ -77,7 +77,7 @@ async def handle_query(request: QueryRequest):
         try:
             async for event in runner.run_async(
                 user_id=user_id,
-                session_id=session_id,
+                session_id=session.id,
                 new_message=new_message,
             ):
                 await q.put(event)

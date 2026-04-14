@@ -27,6 +27,7 @@ def load_mcp_tools(config_path: str) -> dict:
 
     try:
         oauth_token, project_id = get_gcp_oauth_token()
+        print(project_id)
         HEADERS_WITH_OAUTH = {
             "Authorization": f"Bearer {oauth_token}",
             "x-goog-user-project": project_id
